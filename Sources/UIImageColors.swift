@@ -7,11 +7,43 @@
 
 import UIKit
 
-public struct UIImageColors {
+public struct UIImageColors: Codable {
     public var background: UIColor!
     public var primary: UIColor!
     public var secondary: UIColor!
     public var detail: UIColor!
+  
+    enum CodingKeys: String, CodingKey {
+      case background, primary, secondary, detail
+    }
+  
+    public init(from decoder: Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      
+      let bg_data = try container.decode(Data.self, forKey: .background)
+      let pri_data = try container.decode(Data.self, forKey: .primary)
+      let sec_data = try container.decode(Data.self, forKey: .secondary)
+      let det_dat = try container.decode(Data.self, forKey: .detail)
+      
+      background = NSKeyedUnarchiver.unarchiveObject(with: bg_data) as? UIColor ?? UIColor.gray
+      primary = NSKeyedUnarchiver.unarchiveObject(with: pri_data) as? UIColor ?? UIColor.gray
+      secondary = NSKeyedUnarchiver.unarchiveObject(with: sec_data) as? UIColor ?? UIColor.gray
+      detail = NSKeyedUnarchiver.unarchiveObject(with: det_dat) as? UIColor ?? UIColor.gray
+    }
+  
+    public func encode(to encoder: Encoder) throws {
+      var container = encoder.container(keyedBy: CodingKeys.self)
+
+      let bg_dat = NSKeyedArchiver.archivedData(withRootObject: background)
+      let pri_dat = NSKeyedArchiver.archivedData(withRootObject: primary)
+      let sec_dat = NSKeyedArchiver.archivedData(withRootObject: secondary)
+      let det_dat = NSKeyedArchiver.archivedData(withRootObject: detail)
+      
+      try container.encode(bg_dat, forKey: .background)
+      try container.encode(pri_dat, forKey: .primary)
+      try container.encode(sec_dat, forKey: .secondary)
+      try container.encode(det_dat, forKey: .detail)
+    }
   
     public init(background: UIColor, primary: UIColor, secondary: UIColor, detail: UIColor) {
       self.background = background
